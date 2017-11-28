@@ -90,6 +90,10 @@ func (t *TFramedTransport) Flush() (err error) {
 	return t.trans.Flush()
 }
 
+func (t *TFramedTransport) Open() error {
+	return t.trans.Open()
+}
+
 func (t *TFramedTransport) Close() (err error) {
 	t.rbuf = nil
 	t.wbuf = nil
@@ -110,8 +114,8 @@ func NewTFramedTransport(trans Transport, rframed, wframed bool) *TFramedTranspo
 	}
 }
 
-func (t *TFramedTransportFactory) Wraps(trans Transport) (Transport, error) {
-	return NewTFramedTransport(trans, t.rframed, t.wframed), nil
+func (t *TFramedTransportFactory) GetTransport(trans Transport) Transport {
+	return NewTFramedTransport(trans, t.rframed, t.wframed)
 }
 
 func NewTFramedTransportFactory(rframed, wframed bool) *TFramedTransportFactory {

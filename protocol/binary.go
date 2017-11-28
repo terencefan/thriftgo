@@ -37,7 +37,7 @@ type TBinaryProtocolFactory struct {
 	strictWrite bool
 }
 
-func (self *TBinaryProtocolFactory) NewProtocol(t Transport) Protocol {
+func (self *TBinaryProtocolFactory) GetProtocol(t Transport) Protocol {
 	return NewTBinaryProtocol(t, self.strictRead, self.strictWrite)
 }
 

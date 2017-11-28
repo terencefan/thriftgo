@@ -28,6 +28,10 @@ func (self *THttpTransport) Write(message []byte) (int, error) {
 	return self.buf.Write(message)
 }
 
+func (self *THttpTransport) Open() error {
+	return nil
+}
+
 func (self *THttpTransport) Close() error {
 	return nil
 }
@@ -55,15 +59,12 @@ func (self *THttpTransport) Flush() (err error) {
 	return nil
 }
 
-func (self *THttpTransportFactory) GetTransport() (
-	trans Transport, err error,
-) {
-	trans = &THttpTransport{
+func (self *THttpTransportFactory) GetTransport() Transport {
+	return &THttpTransport{
 		addr: self.addr,
 		path: self.path,
 		buf:  bytes.NewBuffer([]byte{}),
 	}
-	return
 }
 
 func NewTHttpTransportFactory(addr, path string) *THttpTransportFactory {

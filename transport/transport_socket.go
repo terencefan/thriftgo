@@ -1,7 +1,6 @@
 package transport
 
 import (
-	"errors"
 	"net"
 )
 
@@ -12,6 +11,7 @@ const (
 
 type TSocket struct {
 	conn     net.Conn
+	addr     string
 	sockType string
 }
 
@@ -21,11 +21,32 @@ type TSocketFactory struct {
 }
 
 func (self *TSocket) Read(message []byte) (int, error) {
+	if self.conn == nil {
+		return 0, NewTransportError("TSocket", "read on unopened transport")
+	}
 	return self.conn.Read(message)
 }
 
 func (self *TSocket) Write(message []byte) (int, error) {
+	if self.conn == nil {
+		return 0, NewTransportError("TSocket", "write on unopened transport")
+	}
 	return self.conn.Write(message)
+}
+
+func (self *TSocket) Open() (err error) {
+	if self.conn != nil {
+		return NewTransportError("TSocket", "transport has been already opened")
+	}
+	switch self.sockType {
+	case sockTypeTcp:
+		self.conn, err = net.Dial(sockTypeTcp, self.addr)
+	case sockTypeUnix:
+		self.conn, err = net.Dial(sockTypeUnix, self.addr)
+	default:
+		err = NewTransportError("TSocket", "invalid socket type "+self.sockType)
+	}
+	return err
 }
 
 func (self *TSocket) Close() error {
@@ -36,37 +57,25 @@ func (self *TSocket) Flush() error {
 	return nil
 }
 
-func (self *TSocketFactory) GetTransport() (Transport, error) {
-	switch self.sockType {
-	case sockTypeTcp:
-		return NewTSocket(self.addr)
-	case sockTypeUnix:
-		return NewTUnixSocket(self.addr)
-	default:
-		return nil, errors.New("invalid socket type")
+func (self *TSocketFactory) GetTransport() Transport {
+	return &TSocket{
+		addr:     self.addr,
+		sockType: self.sockType,
 	}
 }
 
-func NewTSocket(addr string) (trans *TSocket, err error) {
-	conn, err := net.Dial(sockTypeTcp, addr)
-	if err != nil {
-		return
+func NewTSocket(addr string) *TSocket {
+	return &TSocket{
+		addr:     addr,
+		sockType: sockTypeTcp,
 	}
-	trans = &TSocket{
-		conn: conn,
-	}
-	return
 }
 
-func NewTUnixSocket(addr string) (trans *TSocket, err error) {
-	conn, err := net.Dial(sockTypeUnix, addr)
-	if err != nil {
-		return
+func NewTUnixSocket(addr string) *TSocket {
+	return &TSocket{
+		addr:     addr,
+		sockType: sockTypeUnix,
 	}
-	trans = &TSocket{
-		conn: conn,
-	}
-	return
 }
 
 func NewTSocketConn(conn net.Conn) *TSocket {

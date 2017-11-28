@@ -37,6 +37,10 @@ func (t *TBufferedTransport) Flush() (err error) {
 	return
 }
 
+func (t *TBufferedTransport) Open() error {
+	return t.trans.Open()
+}
+
 func (t *TBufferedTransport) Close() (err error) {
 	t.rbuf = nil
 	t.wbuf = nil
@@ -63,8 +67,8 @@ func NewTBufferedTransportSize(trans Transport, rbufsize, wbufsize int) *TBuffer
 	}
 }
 
-func (t *TBufferedTransportFactory) Wraps(trans Transport) (Transport, error) {
-	return NewTBufferedTransportSize(trans, t.rbufsize, t.wbufsize), nil
+func (t *TBufferedTransportFactory) GetTransport(trans Transport) Transport {
+	return NewTBufferedTransportSize(trans, t.rbufsize, t.wbufsize)
 }
 
 func NewTBufferedTransportFactory(rbufsize, wbufsize int) *TBufferedTransportFactory {

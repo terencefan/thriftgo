@@ -6,6 +6,10 @@ type TMemoryBuffer struct {
 	*bytes.Buffer
 }
 
+func (self *TMemoryBuffer) Open() error {
+	return nil
+}
+
 func (self *TMemoryBuffer) Close() error {
 	return nil
 }

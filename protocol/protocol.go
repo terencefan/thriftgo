@@ -7,16 +7,16 @@ import (
 )
 
 type ProtocolError struct {
-	Protocol string
-	Message  string
+	protocol string
+	message  string
 }
 
 func (e ProtocolError) Error() string {
-	return fmt.Sprintf("thrift: [%s] %s", e.Protocol, e.Message)
+	return fmt.Sprintf("[%s] %s", e.protocol, e.message)
 }
 
 type ProtocolFactory interface {
-	NewProtocol(Transport) Protocol
+	GetProtocol(Transport) Protocol
 }
 
 type ProtocolReader interface {
