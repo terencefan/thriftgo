@@ -2,21 +2,21 @@ package protocol
 
 import "fmt"
 
-type TMultiplexedProtocol struct {
+type MultiplexedProtocol struct {
 	Protocol
 	service   string
 	delimeter string
 }
 
-func NewTMultiplexedProtocol(p Protocol, service string) *TMultiplexedProtocol {
-	return &TMultiplexedProtocol{
+func NewMultiplexedProtocol(p Protocol, service string) *MultiplexedProtocol {
+	return &MultiplexedProtocol{
 		Protocol:  p,
 		service:   service,
 		delimeter: ":",
 	}
 }
 
-func (p TMultiplexedProtocol) WriteMessageBegin(
+func (p MultiplexedProtocol) WriteMessageBegin(
 	name string, mtype byte, seqid int32,
 ) error {
 	name = fmt.Sprintf("%s%s%s", p.service, p.delimeter, name)
