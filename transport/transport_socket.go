@@ -84,14 +84,6 @@ func NewTSocket(addr string) *TSocket {
 	}
 }
 
-func NewTSocketTimeout(addr string, timeout time.Duration) *TSocket {
-	return &TSocket{
-		addr:     addr,
-		sockType: sockTypeTcp,
-		timeout:  timeout,
-	}
-}
-
 func NewTUnixSocket(addr string) *TSocket {
 	return &TSocket{
 		addr:     addr,
