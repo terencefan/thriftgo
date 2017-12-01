@@ -34,3 +34,40 @@ func WriteTApplicationException(proto Protocol, e *TApplicationException) (err e
 	}
 	return
 }
+
+func ReadTApplicationException(proto Protocol) (e *TApplicationException, err error) {
+	var (
+		message string
+		code    int32
+	)
+	if err = proto.ReadStructBegin(); err != nil {
+		return
+	}
+	if _, _, err = proto.ReadFieldBegin(); err != nil {
+		return
+	}
+	if message, err = proto.ReadString(); err != nil {
+		return
+	}
+	if err = proto.ReadFieldEnd(); err != nil {
+		return
+	}
+	if _, _, err = proto.ReadFieldBegin(); err != nil {
+		return
+	}
+	if code, err = proto.ReadI32(); err != nil {
+		return
+	}
+	if err = proto.ReadFieldEnd(); err != nil {
+		return
+	}
+	if err = proto.ReadStructEnd(); err != nil {
+		return
+	}
+	// NOTE read field stop
+	if _, _, err = proto.ReadFieldBegin(); err != nil {
+		return
+	}
+	e = NewTApplicationException(message, code)
+	return
+}
