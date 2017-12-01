@@ -2,6 +2,7 @@ package transport
 
 import (
 	"net"
+	"time"
 )
 
 const (
@@ -13,6 +14,7 @@ type TSocket struct {
 	conn     net.Conn
 	addr     string
 	sockType string
+	timeout  time.Duration
 }
 
 type TSocketFactory struct {
@@ -20,47 +22,57 @@ type TSocketFactory struct {
 	sockType string
 }
 
-func (self *TSocket) Read(message []byte) (int, error) {
-	if self.conn == nil {
+func (t *TSocket) SetTimeout(d time.Duration) {
+	t.timeout = d
+}
+
+func (t *TSocket) Read(message []byte) (int, error) {
+	if t.timeout > 0 {
+		t.conn.SetDeadline(time.Now().Add(t.timeout))
+	}
+	if t.conn == nil {
 		return 0, NewTransportError("TSocket", "read on unopened transport")
 	}
-	return self.conn.Read(message)
+	return t.conn.Read(message)
 }
 
-func (self *TSocket) Write(message []byte) (int, error) {
-	if self.conn == nil {
+func (t *TSocket) Write(message []byte) (int, error) {
+	if t.timeout > 0 {
+		t.conn.SetDeadline(time.Now().Add(t.timeout))
+	}
+	if t.conn == nil {
 		return 0, NewTransportError("TSocket", "write on unopened transport")
 	}
-	return self.conn.Write(message)
+	return t.conn.Write(message)
 }
 
-func (self *TSocket) Open() (err error) {
-	if self.conn != nil {
+func (t *TSocket) Open() (err error) {
+	if t.conn != nil {
 		return NewTransportError("TSocket", "transport has been already opened")
 	}
-	switch self.sockType {
+	switch t.sockType {
 	case sockTypeTcp:
-		self.conn, err = net.Dial(sockTypeTcp, self.addr)
+		t.conn, err = net.Dial(sockTypeTcp, t.addr)
 	case sockTypeUnix:
-		self.conn, err = net.Dial(sockTypeUnix, self.addr)
+		t.conn, err = net.Dial(sockTypeUnix, t.addr)
 	default:
-		err = NewTransportError("TSocket", "invalid socket type "+self.sockType)
+		err = NewTransportError("TSocket", "invalid socket type "+t.sockType)
 	}
 	return err
 }
 
-func (self *TSocket) Close() error {
-	return self.conn.Close()
+func (t *TSocket) Close() error {
+	return t.conn.Close()
 }
 
-func (self *TSocket) Flush() error {
+func (t *TSocket) Flush() error {
 	return nil
 }
 
-func (self *TSocketFactory) GetTransport() Transport {
+func (t *TSocketFactory) GetTransport() Transport {
 	return &TSocket{
-		addr:     self.addr,
-		sockType: self.sockType,
+		addr:     t.addr,
+		sockType: t.sockType,
 	}
 }
 
@@ -68,6 +80,15 @@ func NewTSocket(addr string) *TSocket {
 	return &TSocket{
 		addr:     addr,
 		sockType: sockTypeTcp,
+		timeout:  defaultTimeout,
+	}
+}
+
+func NewTSocketTimeout(addr string, timeout time.Duration) *TSocket {
+	return &TSocket{
+		addr:     addr,
+		sockType: sockTypeTcp,
+		timeout:  timeout,
 	}
 }
 
@@ -75,12 +96,14 @@ func NewTUnixSocket(addr string) *TSocket {
 	return &TSocket{
 		addr:     addr,
 		sockType: sockTypeUnix,
+		timeout:  defaultTimeout,
 	}
 }
 
 func NewTSocketConn(conn net.Conn) *TSocket {
 	return &TSocket{
-		conn: conn,
+		conn:    conn,
+		timeout: defaultTimeout,
 	}
 }
 

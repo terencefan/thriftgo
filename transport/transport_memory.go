@@ -1,9 +1,15 @@
 package transport
 
-import "bytes"
+import (
+	"bytes"
+	"time"
+)
 
 type TMemoryBuffer struct {
 	*bytes.Buffer
+}
+
+func (self *TMemoryBuffer) SetTimeout(d time.Duration) {
 }
 
 func (self *TMemoryBuffer) Open() error {

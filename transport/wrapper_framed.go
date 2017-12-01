@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"time"
 )
 
 const (
@@ -22,25 +23,6 @@ type TFramedTransport struct {
 type TFramedTransportFactory struct {
 	rframed bool
 	wframed bool
-}
-
-type ErrFrameInvalid struct {
-}
-
-func (e ErrFrameInvalid) Error() string {
-	return "frame size invalid!"
-}
-
-type ErrFrameTooBig struct {
-	size int64
-}
-
-func (e ErrFrameTooBig) Error() string {
-	return fmt.Sprintf(
-		"frame size exceeded: (%d > %d)",
-		e.size,
-		MAX_FRAME_SIZE,
-	)
 }
 
 func (t *TFramedTransport) readFrame() (err error) {
@@ -67,7 +49,10 @@ func (t *TFramedTransport) Write(message []byte) (int, error) {
 			return 0, err
 		}
 		if t.wbuf.Len() > MAX_FRAME_SIZE {
-			return 0, &ErrFrameTooBig{int64(t.wbuf.Len())}
+			return 0, NewTransportError(
+				"Framed",
+				fmt.Sprintf("frame size exceeded: (%d > %d)", t.wbuf.Len(), MAX_FRAME_SIZE),
+			)
 		}
 		return l, nil
 	} else {
@@ -88,6 +73,10 @@ func (t *TFramedTransport) Flush() (err error) {
 		}
 	}
 	return t.trans.Flush()
+}
+
+func (t *TFramedTransport) SetTimeout(d time.Duration) {
+	t.trans.SetTimeout(d)
 }
 
 func (t *TFramedTransport) Open() error {

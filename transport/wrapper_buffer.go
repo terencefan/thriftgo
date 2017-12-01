@@ -2,6 +2,7 @@ package transport
 
 import (
 	"bufio"
+	"time"
 )
 
 const (
@@ -35,6 +36,10 @@ func (t *TBufferedTransport) Flush() (err error) {
 		return
 	}
 	return
+}
+
+func (t *TBufferedTransport) SetTimeout(d time.Duration) {
+	t.trans.SetTimeout(d)
 }
 
 func (t *TBufferedTransport) Open() error {
