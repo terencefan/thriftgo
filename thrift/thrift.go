@@ -1,7 +1,7 @@
 package thrift
 
 import (
-	tp "github.com/stdrickforce/go-thrift/parser"
+	tp "github.com/stdrickforce/thriftgo/parser"
 )
 
 type Thrift struct {
