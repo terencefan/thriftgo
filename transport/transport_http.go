@@ -3,7 +3,6 @@ package transport
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"net"
 	"net/http"
 	"time"
@@ -11,14 +10,12 @@ import (
 
 type THttpTransport struct {
 	addr    string
-	path    string
 	buf     *bytes.Buffer
 	timeout time.Duration
 }
 
 type THttpTransportFactory struct {
 	addr string
-	path string
 }
 
 func (g *THttpTransport) Read(message []byte) (int, error) {
@@ -42,12 +39,10 @@ func (g *THttpTransport) SetTimeout(d time.Duration) {
 }
 
 func (g *THttpTransport) Flush() (err error) {
-	uri := fmt.Sprintf("http://%s%s", g.addr, g.path)
-
 	client := &http.Client{
 		Timeout: g.timeout,
 	}
-	resp, err := client.Post(uri, "application/thrift", g.buf)
+	resp, err := client.Post(g.addr, "application/thrift", g.buf)
 
 	if ne, ok := err.(net.Error); ok && ne.Timeout() {
 		err = errors.New("[THttpTransport] time limit exceeded")
@@ -65,20 +60,18 @@ func (g *THttpTransport) Flush() (err error) {
 }
 
 func (g *THttpTransportFactory) GetTransport() Transport {
-	return NewTHttpTransport(g.addr, g.path)
+	return NewTHttpTransport(g.addr)
 }
 
-func NewTHttpTransport(addr, path string) *THttpTransport {
+func NewTHttpTransport(addr string) *THttpTransport {
 	return &THttpTransport{
 		addr: addr,
-		path: path,
 		buf:  bytes.NewBuffer([]byte{}),
 	}
 }
 
-func NewTHttpTransportFactory(addr, path string) *THttpTransportFactory {
+func NewTHttpTransportFactory(addr string) *THttpTransportFactory {
 	return &THttpTransportFactory{
 		addr: addr,
-		path: path,
 	}
 }
