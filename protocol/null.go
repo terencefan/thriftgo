@@ -1,5 +1,9 @@
 package protocol
 
+import (
+	. "github.com/stdrickforce/thriftgo/transport"
+)
+
 type t_null_protocol struct {
 }
 
@@ -175,10 +179,6 @@ func (p *t_null_protocol) Skip(ftype byte) error {
 	return nil
 }
 
-func (p *t_null_protocol) Flush() error {
-	return nil
-}
-
-func (p *t_null_protocol) Close() error {
-	return nil
+func (p *t_null_protocol) GetTransport() Transport {
+	return TNullTransport
 }

@@ -508,10 +508,6 @@ func (p *TBinaryProtocol) Skip(ftype byte) error {
 	}
 }
 
-func (p *TBinaryProtocol) Flush() error {
-	return p.trans.Flush()
-}
-
-func (p *TBinaryProtocol) Close() error {
-	return p.trans.Close()
+func (p *TBinaryProtocol) GetTransport() Transport {
+	return p.trans
 }

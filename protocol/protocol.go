@@ -68,6 +68,5 @@ type Protocol interface {
 	ProtocolReader
 	ProtocolWriter
 	Skip(byte) error
-	Flush() error
-	Close() error
+	GetTransport() Transport
 }
